@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rohlik IMS — Inventory Management</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #141720;
+      --surface2: #1c2030;
+      --border: #252a3a;
+      --accent: #4fffb0;
+      --accent2: #7c6dfa;
+      --warn: #ffb347;
+      --danger: #ff5370;
+      --text: #e8eaf2;
+      --muted: #6b7294;
+      --card-radius: 14px;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 220px;
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 28px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo .brand {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .sidebar-logo .sub {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .nav {
+      flex: 1;
+      padding: 16px 10px;
+    }
+
+    .nav-section {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 10px 10px 6px;
+      margin-top: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--muted);
+      transition: all 0.2s;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: rgba(79, 255, 176, 0.1);
+      color: var(--accent);
+    }
+
+    .nav-item .icon {
+      width: 18px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: 220px;
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .page-title {
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .topbar-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      width: 220px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-box:focus {
+      border-color: var(--accent);
+    }
+
+    .search-box::placeholder {
+      color: var(--muted);
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 32px;
+    }
+
+    /* PAGE SECTIONS */
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    /* STAT CARDS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--accent);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent-color, var(--accent));
+    }
+
+    .stat-card .label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .stat-card .value {
+      font-family: var(--font-head);
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--accent-color, var(--accent));
+    }
+
+    .stat-card .sub-value {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .stat-card .icon-bg {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      font-size: 28px;
+      opacity: 0.12;
+    }
+
+    /* TABLES */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .table-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-header .title {
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .table-header .count {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .filter-row {
+      padding: 12px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(79, 255, 176, 0.07);
+    }
+
+    .tbl-search {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+      margin-left: auto;
+    }
+
+    .tbl-search:focus {
+      border-color: var(--accent);
+    }
+
+    .tbl-search::placeholder {
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      background: var(--surface2);
+      padding: 12px 22px;
+      text-align: left;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    thead th:hover {
+      color: var(--text);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--surface2);
+    }
+
+    td {
+      padding: 13px 22px;
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-green {
+      background: rgba(79, 255, 176, 0.12);
+      color: #4fffb0;
+      border: 1px solid rgba(79, 255, 176, 0.2);
+    }
+
+    .badge-blue {
+      background: rgba(124, 109, 250, 0.12);
+      color: #a09af0;
+      border: 1px solid rgba(124, 109, 250, 0.2);
+    }
+
+    .badge-warn {
+      background: rgba(255, 179, 71, 0.12);
+      color: #ffb347;
+      border: 1px solid rgba(255, 179, 71, 0.2);
+    }
+
+    .badge-danger {
+      background: rgba(255, 83, 112, 0.12);
+      color: #ff5370;
+      border: 1px solid rgba(255, 83, 112, 0.2);
+    }
+
+    .badge-gray {
+      background: rgba(107, 114, 148, 0.12);
+      color: #8891a8;
+      border: 1px solid rgba(107, 114, 148, 0.2);
+    }
+
+    .pagination {
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-top: 1px solid var(--border);
+      justify-content: flex-end;
+    }
+
+    .pg-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .pg-btn:hover,
+    .pg-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .pg-info {
+      font-size: 12px;
+      color: var(--muted);
+      margin-right: 8px;
+    }
+
+    /* DASHBOARD CHARTS */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 22px;
+    }
+
+    .chart-title {
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: var(--text);
+    }
+
+    /* BAR CHART */
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bar-label {
+      font-size: 11px;
+      color: var(--muted);
+      width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .bar-val {
+      font-size: 11px;
+      color: var(--muted);
+      width: 55px;
+      text-align: right;
+      font-family: var(--font-mono);
+    }
+
+    /* DONUT */
+    .donut-wrap {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ACTIVITY FEED */
+    .activity-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .activity-text {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .activity-time {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* WAREHOUSE GRID */
+    .warehouse-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .wh-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 20px;
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .wh-card:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+    }
+
+    .wh-id {
+      font-size: 10px;
+      color: var(--accent2);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .wh-name {
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .wh-location {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .wh-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .wh-stat {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .wh-stat .sl {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .wh-stat .sv {
+      font-size: 16px;
+      font-weight: 700;
+      font-family: var(--font-head);
+      margin-top: 2px;
+    }
+
+    /* ORDER DETAIL */
+    .order-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    /* EMPTY STATE */
+    .empty {
+      text-align: center;
+      padding: 60px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .empty .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    /* SUPPLIER CARD */
+    .supplier-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .sup-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 22px;
+      transition: border-color 0.2s;
+    }
+
+    .sup-card:hover {
+      border-color: var(--warn);
+    }
+
+    .sup-name {
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .sup-detail {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .sup-badge {
+      margin-top: 12px;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 480px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-family: var(--font-head);
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .modal-row {
+      margin-bottom: 14px;
+    }
+
+    .modal-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .modal-val {
+      font-size: 14px;
+    }
+
+    .modal-close {
+      float: right;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      margin-top: -4px;
+    }
+
+    .modal-close:hover {
+      color: var(--danger);
+    }
+
+    /* TOOLTIP */
+    [title] {
+      cursor: help;
+    }
+
+    /* GRID 2-COL */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .section-title {
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+
+    .sparkline {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 40px;
+    }
+
+    .spark-bar {
+      flex: 1;
+      border-radius: 2px 2px 0 0;
+      min-height: 4px;
+      transition: opacity 0.2s;
+    }
+
+    .spark-bar:hover {
+      opacity: 0.7;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">rohlik</div>
+      <div class="sub">IMS v2.4</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" onclick="navigate('dashboard', this)">
+        <span class="icon">⬡</span> Dashboard
+      </div>
+      <div class="nav-section">Inventory</div>
+      <div class="nav-item" onclick="navigate('products', this)">
+        <span class="icon">◈</span> Products
+      </div>
+      <div class="nav-item" onclick="navigate('inventory', this)">
+        <span class="icon">▦</span> Stock Levels
+      </div>
+      <div class="nav-item" onclick="navigate('warehouses', this)">
+        <span class="icon">⬕</span> Warehouses
+      </div>
+      <div class="nav-section">Orders</div>
+      <div class="nav-item" onclick="navigate('sales', this)">
+        <span class="icon">↗</span> Sales Orders (B2B)
+      </div>
+      <div class="nav-item" onclick="navigate('purchase', this)">
+        <span class="icon">↙</span> Purchase Orders
+      </div>
+      <div class="nav-item" onclick="navigate('shoporders', this)">
+        <span class="icon">🛒</span> Shop Orders (B2C)
+      </div>
+      <div class="nav-section">People</div>
+      <div class="nav-item" onclick="navigate('customers', this)">
+        <span class="icon">◎</span> Customers
+      </div>
+      <div class="nav-item" onclick="navigate('suppliers', this)">
+        <span class="icon">◉</span> Suppliers
+      </div>
+      <div class="nav-item" onclick="navigate('users', this)">
+        <span class="icon">◌</span> Users
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="status-dot"></span> Live · inventory_db
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="topbar-right">
+        <input class="search-box" id="global-search" placeholder="Search anything..."
+          oninput="globalSearch(this.value)">
+        <div class="avatar" title="Alice Admin">AA</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ====== DASHBOARD ====== -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card" data-stat="products" style="--accent-color:#4fffb0">
+            <div class="label">Total Products</div>
+            <div class="value">—</div>
+            <div class="sub-value">loading...</div>
+            <div class="icon-bg">◈</div>
+          </div>
+          <div class="stat-card" data-stat="inventory" style="--accent-color:#7c6dfa">
+            <div class="label">Inventory Records</div>
+            <div class="value">—</div>
+            <div class="sub-value">loading...</div>
+            <div class="icon-bg">▦</div>
+          </div>
+          <div class="stat-card" data-stat="sales" style="--accent-color:#ffb347">
+            <div class="label">All Orders (B2B + B2C)</div>
+            <div class="value" id="dash-sales-count">—</div>
+            <div class="sub-value" id="dash-sales-sub">loading...</div>
+            <div class="icon-bg">↗</div>
+          </div>
+          <div class="stat-card" data-stat="po" style="--accent-color:#ff5370">
+            <div class="label">Purchase Orders</div>
+            <div class="value">—</div>
+            <div class="sub-value">loading...</div>
+            <div class="icon-bg">↙</div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-title">Stock by Category</div>
+            <div class="bar-chart" id="category-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Sales Order Status</div>
+            <div class="donut-wrap">
+              <svg width="120" height="120" id="donut-svg" viewBox="0 0 120 120"></svg>
+              <div class="donut-legend" id="donut-legend"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-title">Warehouse Capacity</div>
+            <div class="bar-chart" id="wh-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Recent Activity</div>
+            <div class="activity-feed" id="activity-feed"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== PRODUCTS ====== -->
+      <div class="page" id="page-products">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="title">Product Catalogue</div>
+            <span class="count" id="prod-count">2670 products</span>
+          </div>
+          <div class="filter-row">
+            <button class="filter-btn active" onclick="filterProducts('all',this)">All</button>
+            <button class="filter-btn" onclick="filterProducts('Bakery',this)">Bakery</button>
+            <button class="filter-btn" onclick="filterProducts('Fruit and vegetable',this)">Fruit & Veg</button>
+            <button class="filter-btn" onclick="filterProducts('Meat and fish',this)">Meat & Fish</button>
+            <button class="filter-btn" onclick="filterProducts('Dairy',this)">Dairy</button>
+            <button class="filter-btn" onclick="filterProducts('Drinks',this)">Drinks</button>
+            <button class="filter-btn" onclick="filterProducts('Frozen',this)">Frozen</button>
+            <button class="filter-btn" onclick="filterProducts('Grocery',this)">Grocery</button>
+            <button class="filter-btn" onclick="filterProducts('Ready meals',this)">Ready Meals</button>
+            <input class="tbl-search" placeholder="Search products..." oninput="searchProducts(this.value)">
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th onclick="sortProducts('id')"># ID</th>
+                <th onclick="sortProducts('name')">Name</th>
+                <th onclick="sortProducts('category')">Category</th>
+                <th onclick="sortProducts('price')">Price (CZK)</th>
+              </tr>
+            </thead>
+            <tbody id="prod-tbody"></tbody>
+          </table>
+          <div class="pagination" id="prod-pagination"></div>
+        </div>
+      </div>
+
+      <!-- ====== INVENTORY / STOCK ====== -->
+      <div class="page" id="page-inventory">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="title">Stock Levels</div>
+            <span class="count" id="inv-count">5432 records</span>
+          </div>
+          <div class="filter-row">
+            <button class="filter-btn active" onclick="filterInv('all',this)">All Warehouses</button>
+            <button class="filter-btn" onclick="filterInv(1,this)">WH-001</button>
+            <button class="filter-btn" onclick="filterInv(2,this)">WH-002</button>
+            <button class="filter-btn" onclick="filterInv(3,this)">WH-003</button>
+            <button class="filter-btn" onclick="filterInv(4,this)">WH-004</button>
+            <button class="filter-btn" onclick="filterInv(5,this)">WH-005</button>
+            <button class="filter-btn" onclick="filterInv(6,this)">WH-006</button>
+            <button class="filter-btn" onclick="filterInv(7,this)">WH-007</button>
+            <input class="tbl-search" placeholder="Search stock..." oninput="searchInv(this.value)">
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Warehouse</th>
+                <th>Aisle</th>
+                <th>Shelf</th>
+                <th>Quantity</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="inv-tbody"></tbody>
+          </table>
+          <div class="pagination" id="inv-pagination"></div>
+        </div>
+      </div>
+
+      <!-- ====== WAREHOUSES ====== -->
+      <div class="page" id="page-warehouses">
+        <div class="warehouse-grid" id="wh-grid"></div>
+        <div class="table-card">
+          <div class="table-header">
+            <div class="title">Warehouse Details</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>City</th>
+                <th>Country</th>
+                <th>Employees</th>
+                <th>Supplier</th>
+                <th>Products</th>
+              </tr>
+            </thead>
+            <tbody id="wh-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ====== SALES ORDERS ====== -->
+      <div class="page" id="page-sales">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="title">Sales Orders</div>
+            <span class="count" id="sales-count">loading...</span>
+          </div>
+          <div class="filter-row">
+            <button class="filter-btn active" onclick="filterSales('all',this)">All</button>
+            <button class="filter-btn" onclick="filterSales('Pending',this)">Pending</button>
+            <button class="filter-btn" onclick="filterSales('Processing',this)">Processing</button>
+            <button class="filter-btn" onclick="filterSales('Shipped',this)">Shipped</button>
+            <button class="filter-btn" onclick="filterSales('Delivered',this)">Delivered</button>
+            <button class="filter-btn" onclick="filterSales('Cancelled',this)">Cancelled</button>
+            <input class="tbl-search" placeholder="Search orders..." oninput="searchSales(this.value)">
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Issued By</th>
+                <th>Date</th>
+                <th>Amount (CZK)</th>
+                <th>Payment</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="sales-tbody"></tbody>
+          </table>
+          <div class="pagination" id="sales-pagination"></div>
+        </div>
+      </div>
+
+      <!-- ====== PURCHASE ORDERS ====== -->
+      <div class="page" id="page-purchase">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="title">Purchase Orders</div>
+            <span class="count">5 orders</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>PO ID</th>
+                <th>Supplier</th>
+                <th>Created By</th>
+                <th>Type</th>
+                <th>Order Date</th>
+                <th>Expected</th>
+                <th>Amount</th>
+                <th>Payment</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="po-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ====== SHOP ORDERS ====== -->
+      <div class="page" id="page-shoporders">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="title">Shop Orders (B2C)</div>
+            <span class="count" id="shoporders-count">loading...</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Date</th>
+                <th>Amount (CZK)</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="shoporders-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ====== CUSTOMERS ====== -->
+      <div class="page" id="page-customers">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="title">Customers</div>
+            <span class="count">5 customers</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>City</th>
+                <th>Country</th>
+                <th>Phone</th>
+                <th>Orders</th>
+              </tr>
+            </thead>
+            <tbody id="cust-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ====== SUPPLIERS ====== -->
+      <div class="page" id="page-suppliers">
+        <div class="supplier-grid" id="sup-grid"></div>
+      </div>
+
+      <!-- ====== USERS ====== -->
+      <div class="page" id="page-users">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="title">System Users</div>
+            <span class="count">3 users</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Joined</th>
+                <th>Orders Issued</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal(null, true)">✕</button>
+      <div class="modal-title" id="modal-title"></div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // ============================================================
+    // API CONFIG & AUTH GUARD
+    // ============================================================
+    // requireAdmin() from app.js redirects to admin-login.html if no admin JWT
+    // Uncomment the line below to enforce auth in production:
+    // requireAdmin('admin-login.html');
+
+    const token = getToken();
+    const AUTH_HEADER = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const API_BASE = (window.location.protocol === 'file:' || window.location.origin === 'null')
+      ? 'http://localhost:5000/api'
+      : `${window.location.origin}/api`;
+
+    async function apiGet(path) {
+      const res = await fetch(`${API_BASE}${path}`, { headers: AUTH_HEADER });
+      if (!res.ok) throw new Error(`API ${path} → ${res.status}`);
+      return res.json();
+    }
+
+    // ============================================================
+    // LIVE DATA STORE  (populated from MySQL via backend APIs)
+    // ============================================================
+    const DB = {
+      suppliers: [],
+      warehouses: [],
+      users: [],
+      customers: [],
+      purchase_orders: [],
+      shop_orders: [],
+    };
+
+    let products = [];
+    let inventory = [];
+    let sales_orders = [];
+
+    // ============================================================
+    // BOOTSTRAP — fetch all data then render dashboard
+    // ============================================================
+    async function loadAllData() {
+      try {
+        const [
+          suppliersData, warehousesData, usersData,
+          customersData, poData, productsData, invData, salesData, shopData
+        ] = await Promise.all([
+          apiGet('/orders/suppliers'),
+          apiGet('/orders/warehouses'),
+          apiGet('/users'),
+          apiGet('/orders/customers'),
+          apiGet('/orders/purchase'),
+          apiGet('/products'),
+          apiGet('/inventory'),
+          apiGet('/orders/sales'),
+          apiGet('/orders/all-user-orders'),
+        ]);
+
+        DB.suppliers = suppliersData;
+        DB.warehouses = warehousesData;
+        DB.users = usersData;
+        DB.customers = customersData;
+        DB.purchase_orders = poData;
+        DB.shop_orders = shopData;
+
+        products = productsData;
+        inventory = invData.map(r => ({
+          id: r.id, product_id: r.product_id, location_id: r.location_id,
+          quantity: r.quantity, aisle: r.aisle, shelf: r.shelf,
+          // enriched fields from JOIN
+          _product_name: r.product_name, _category: r.category,
+          _warehouse_name: r.warehouse_name, _wh_code: r.wh_code,
+        }));
+        sales_orders = salesData.map(o => ({
+          id: o.id, customer_id: o.customer_id, issued_by: o.issued_by,
+          order_date: o.order_date, total_amount: parseFloat(o.total_amount),
+          status: o.status, payment_type: o.payment_type,
+          // enriched
+          _customer_name: o.customer_name, _issued_by_name: o.issued_by_name,
+        }));
+
+        // Rebuild lookup maps with fresh data
+        rebuildMaps();
+        renderDashboard();
+
+        // Update sidebar status
+        document.querySelector('.sidebar-footer').innerHTML =
+          `<span class="status-dot"></span> Live · inventory_db`;
+      } catch (err) {
+        console.error('Failed to load data:', err);
+        document.querySelector('.sidebar-footer').innerHTML =
+          `<span style="color:var(--danger)">⚠ DB offline · ${err.message}</span>`;
+      }
+    }
+
+    // ============================================================
+    // NAVIGATION
+    // ============================================================
+    function navigate(page, el) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+      if (el) el.classList.add('active');
+      const titles = {
+        dashboard: 'Dashboard', products: 'Product Catalogue', inventory: 'Stock Levels',
+        warehouses: 'Warehouses', sales: 'Sales Orders', purchase: 'Purchase Orders',
+        customers: 'Customers', suppliers: 'Suppliers', users: 'Users'
+      };
+      document.getElementById('page-title').textContent = titles[page] || page;
+      // Render page if not yet rendered
+      if (page === 'products') renderProducts();
+      if (page === 'inventory') renderInventory();
+      if (page === 'warehouses') renderWarehouses();
+      if (page === 'sales') renderSales();
+      if (page === 'purchase') renderPO();
+      if (page === 'shoporders') renderShopOrders();
+      if (page === 'customers') renderCustomers();
+      if (page === 'suppliers') renderSuppliers();
+      if (page === 'users') renderUsers();
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function fmt(n) { return Number(n).toLocaleString('cs-CZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    function statusBadge(s) {
+      const map = {
+        'Pending': 'warn', 'Processing': 'blue', 'Shipped': 'blue', 'Delivered': 'green',
+        'Cancelled': 'danger', 'Draft': 'gray', 'Approved': 'green', 'Sent': 'warn',
+        'Received': 'green', 'Standard': 'gray', 'Urgent': 'danger', 'Blanket': 'blue'
+      };
+      return `<span class="badge badge-${map[s] || 'gray'}">${s}</span>`;
+    }
+    function payBadge(s) {
+      const map = { Visa: 'blue', Cash: 'green', Online: 'warn' };
+      return `<span class="badge badge-${map[s] || 'gray'}">${s}</span>`;
+    }
+
+    let productMap = {};
+    let warehouseMap = {};
+    let supplierMap = {};
+    let userMap = {};
+    let customerMap = {};
+
+    function rebuildMaps() {
+      productMap = Object.fromEntries(products.map(p => [p.id, p]));
+      warehouseMap = Object.fromEntries(DB.warehouses.map(w => [w.id, w]));
+      supplierMap = Object.fromEntries(DB.suppliers.map(s => [s.id, s]));
+      userMap = Object.fromEntries(DB.users.map(u => [u.id, u]));
+      customerMap = Object.fromEntries(DB.customers.map(c => [c.id, c]));
+    }
+
+    function supplierName(id) { return supplierMap[id]?.name || '-'; }
+    function warehouseName(id) { return warehouseMap[id]?.name || '-'; }
+    function productName(id) {
+      // prefer enriched data if available
+      const inv = inventory.find(r => r.product_id === id);
+      return inv?._product_name || productMap[id]?.name || '-';
+    }
+    function productCat(id) {
+      const inv = inventory.find(r => r.product_id === id);
+      return inv?._category || productMap[id]?.category || '-';
+    }
+    function userName(id) {
+      const so = sales_orders.find(o => o.issued_by === id);
+      return so?._issued_by_name || userMap[id]?.name || '-';
+    }
+    function customerName(id) {
+      const so = sales_orders.find(o => o.customer_id === id);
+      return so?._customer_name || customerMap[id]?.name || '-';
+    }
+
+    // ============================================================
+    // PAGINATION HELPER
+    // ============================================================
+    function paginate(data, page, size) {
+      return { items: data.slice((page - 1) * size, page * size), total: data.length, pages: Math.ceil(data.length / size) };
+    }
+    function renderPagination(containerId, state, cb) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      const { currentPage, totalPages } = state;
+      let html = `<span class="pg-info">Page ${currentPage} of ${totalPages}</span>`;
+      html += `<button class="pg-btn" onclick="(${cb})(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`;
+      let start = Math.max(1, currentPage - 2), end = Math.min(totalPages, start + 4);
+      for (let p = start; p <= end; p++) {
+        html += `<button class="pg-btn ${p === currentPage ? 'active' : ''}" onclick="(${cb})(${p})">${p}</button>`;
+      }
+      html += `<button class="pg-btn" onclick="(${cb})(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>›</button>`;
+      el.innerHTML = html;
+    }
+
+    // ============================================================
+    // PRODUCTS
+    // ============================================================
+    let prodState = { filter: 'all', search: '', sort: 'id', sortDir: 1, page: 1, pageSize: 20 };
+    let filteredProds = [];
+
+    function filterProducts(cat, btn) {
+      prodState.filter = cat; prodState.page = 1;
+      document.querySelectorAll('#page-products .filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderProducts();
+    }
+    function searchProducts(q) { prodState.search = q.toLowerCase(); prodState.page = 1; renderProducts(); }
+    function sortProducts(field) {
+      if (prodState.sort === field) prodState.sortDir *= -1; else { prodState.sort = field; prodState.sortDir = 1; }
+      renderProducts();
+    }
+    function renderProducts(page) {
+      if (page) prodState.page = page;
+      filteredProds = products.filter(p => {
+        if (prodState.filter !== 'all' && p.category !== prodState.filter) return false;
+        if (prodState.search && !p.name.toLowerCase().includes(prodState.search) && !p.category.toLowerCase().includes(prodState.search)) return false;
+        return true;
+      });
+      filteredProds.sort((a, b) => {
+        const f = prodState.sort;
+        if (f === 'price') return (a.price - b.price) * prodState.sortDir;
+        if (f === 'id') return (a.id - b.id) * prodState.sortDir;
+        return a[f].localeCompare(b[f]) * prodState.sortDir;
+      });
+      const { items, total, pages } = paginate(filteredProds, prodState.page, prodState.pageSize);
+      document.getElementById('prod-count').textContent = `${total.toLocaleString()} products`;
+      const catColors = {
+        'Bakery': '#ffb347', 'Fruit and vegetable': '#4fffb0', 'Meat and fish': '#ff5370',
+        'Dairy': '#7c6dfa', 'Drinks': '#38bdf8', 'Frozen': '#a5f3fc', 'Grocery': '#fbbf24', 'Ready meals': '#f9a8d4'
+      };
+      const tbody = document.getElementById('prod-tbody');
+      tbody.innerHTML = items.map(p => `
+    <tr>
+      <td><span class="tag">#${p.id}</span></td>
+      <td>${p.name}</td>
+      <td><span style="color:${catColors[p.category] || '#888'};font-size:12px">● </span>${p.category}</td>
+      <td style="font-family:var(--font-mono);text-align:right;padding-right:32px">${fmt(p.price)}</td>
+    </tr>`).join('');
+      renderPagination('prod-pagination', { currentPage: prodState.page, totalPages: pages },
+        `function(p){prodState.page=p;renderProducts()}`);
+    }
+
+    // ============================================================
+    // INVENTORY
+    // ============================================================
+    let invState = { filter: 'all', search: '', page: 1, pageSize: 25 };
+    let filteredInv = [];
+
+    function filterInv(wh, btn) {
+      invState.filter = wh; invState.page = 1;
+      document.querySelectorAll('#page-inventory .filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderInventory();
+    }
+    function searchInv(q) { invState.search = q.toLowerCase(); invState.page = 1; renderInventory(); }
+    function renderInventory(page) {
+      if (page) invState.page = page;
+      filteredInv = inventory.filter(r => {
+        if (invState.filter !== 'all' && r.location_id !== invState.filter) return false;
+        if (invState.search) {
+          const pn = productName(r.product_id).toLowerCase();
+          const wn = warehouseName(r.location_id).toLowerCase();
+          if (!pn.includes(invState.search) && !wn.includes(invState.search)) return false;
+        }
+        return true;
+      });
+      const { items, total, pages } = paginate(filteredInv, invState.page, invState.pageSize);
+      document.getElementById('inv-count').textContent = `${total.toLocaleString()} records`;
+      const tbody = document.getElementById('inv-tbody');
+      tbody.innerHTML = items.map(r => {
+        const qty = r.quantity;
+        const qtyBadge = qty === 0 ? `<span class="badge badge-danger">Out of Stock</span>` :
+          qty < 20 ? `<span class="badge badge-warn">Low</span>` :
+            `<span class="badge badge-green">In Stock</span>`;
+        return `<tr>
+      <td>${r._product_name || productName(r.product_id)}</td>
+      <td style="color:var(--muted);font-size:12px">${r._category || productCat(r.product_id)}</td>
+      <td><span class="tag">${r._wh_code || DB.warehouses.find(w => w.id === r.location_id)?.warehouse_id || '-'}</span> ${r._warehouse_name || warehouseName(r.location_id)}</td>
+      <td>${r.aisle}</td>
+      <td>${r.shelf}</td>
+      <td style="font-family:var(--font-mono);font-weight:500">${qty.toLocaleString()}</td>
+      <td>${qtyBadge}</td>
+    </tr>`;
+      }).join('');
+      renderPagination('inv-pagination', { currentPage: invState.page, totalPages: pages },
+        `function(p){invState.page=p;renderInventory()}`);
+    }
+
+    // ============================================================
+    // WAREHOUSES
+    // ============================================================
+    function renderWarehouses() {
+      const whProductCounts = {};
+      inventory.forEach(r => { whProductCounts[r.location_id] = (whProductCounts[r.location_id] || 0) + 1; });
+      const whStockTotals = {};
+      inventory.forEach(r => { whStockTotals[r.location_id] = (whStockTotals[r.location_id] || 0) + r.quantity; });
+
+      document.getElementById('wh-grid').innerHTML = DB.warehouses.map(w => `
+    <div class="wh-card">
+      <div class="wh-id">${w.warehouse_id}</div>
+      <div class="wh-name">${w.name}</div>
+      <div class="wh-location">📍 ${w.city}, ${w.country}</div>
+      <div class="wh-stats">
+        <div class="wh-stat">
+          <div class="sl">Employees</div>
+          <div class="sv" style="color:var(--accent2)">${w.employee}</div>
+        </div>
+        <div class="wh-stat">
+          <div class="sl">Products</div>
+          <div class="sv" style="color:var(--accent)">${(whProductCounts[w.id] || 0).toLocaleString()}</div>
+        </div>
+        <div class="wh-stat">
+          <div class="sl">Total Units</div>
+          <div class="sv" style="color:var(--warn)">${(whStockTotals[w.id] || 0).toLocaleString()}</div>
+        </div>
+        <div class="wh-stat">
+          <div class="sl">Supplier</div>
+          <div class="sv" style="font-size:12px;color:var(--muted)">S${w.supplier_id}</div>
+        </div>
+      </div>
+    </div>`).join('');
+
+      document.getElementById('wh-tbody').innerHTML = DB.warehouses.map(w => `
+    <tr>
+      <td><span class="tag">${w.warehouse_id}</span></td>
+      <td>${w.name}</td>
+      <td>${w.city}</td>
+      <td>${w.country}</td>
+      <td style="font-family:var(--font-mono)">${w.employee}</td>
+      <td>${supplierName(w.supplier_id)}</td>
+      <td style="font-family:var(--font-mono)">${(whProductCounts[w.id] || 0).toLocaleString()}</td>
+    </tr>`).join('');
+    }
+
+    // ============================================================
+    // SALES ORDERS
+    // ============================================================
+    let salesState = { filter: 'all', search: '', page: 1, pageSize: 20 };
+    let filteredSales = [];
+
+    function filterSales(s, btn) {
+      salesState.filter = s; salesState.page = 1;
+      document.querySelectorAll('#page-sales .filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderSales();
+    }
+    function searchSales(q) { salesState.search = q.toLowerCase(); salesState.page = 1; renderSales(); }
+    function renderSales(page) {
+      if (page) salesState.page = page;
+      filteredSales = sales_orders.filter(o => {
+        if (salesState.filter !== 'all' && o.status !== salesState.filter) return false;
+        if (salesState.search) {
+          const cn = customerName(o.customer_id).toLowerCase();
+          const un = userName(o.issued_by).toLowerCase();
+          if (!cn.includes(salesState.search) && !un.includes(salesState.search)) return false;
+        }
+        return true;
+      });
+      document.getElementById('sales-count').textContent = `${filteredSales.length.toLocaleString()} orders`;
+
+      const { items, total: tot, pages } = paginate(filteredSales, salesState.page, salesState.pageSize);
+      document.getElementById('sales-tbody').innerHTML = items.map(o => `
+    <tr>
+      <td><span class="tag">#${o.id}</span></td>
+      <td>${customerName(o.customer_id)}</td>
+      <td style="color:var(--muted)">${userName(o.issued_by)}</td>
+      <td style="color:var(--muted)">${o.order_date}</td>
+      <td style="font-family:var(--font-mono)">${fmt(o.total_amount)}</td>
+      <td>${payBadge(o.payment_type)}</td>
+      <td>${statusBadge(o.status)}</td>
+    </tr>`).join('');
+      renderPagination('sales-pagination', { currentPage: salesState.page, totalPages: pages },
+        `function(p){salesState.page=p;renderSales()}`);
+    }
+
+    // ============================================================
+    // PURCHASE ORDERS
+    // ============================================================
+    function renderPO() {
+      document.getElementById('po-tbody').innerHTML = DB.purchase_orders.map(o => `
+    <tr>
+      <td><span class="tag">#${o.id}</span></td>
+      <td>${supplierName(o.supplier_id)}</td>
+      <td style="color:var(--muted)">${userName(o.created_by)}</td>
+      <td>${statusBadge(o.order_type)}</td>
+      <td style="color:var(--muted)">${o.order_date}</td>
+      <td style="color:var(--muted)">${o.expected_date}</td>
+      <td style="font-family:var(--font-mono)">€${fmt(o.total_amount)}</td>
+      <td>${payBadge(o.payment)}</td>
+      <td>${statusBadge(o.status)}</td>
+    </tr>`).join('');
+    }
+
+    // ============================================================
+    // SHOP ORDERS
+    // ============================================================
+    function renderShopOrders() {
+      document.getElementById('shoporders-count').textContent = `${DB.shop_orders.length.toLocaleString()} orders`;
+      document.getElementById('shoporders-tbody').innerHTML = DB.shop_orders.map(o => `
+    <tr>
+      <td><span class="tag">#${o.id}</span></td>
+      <td>${o.customer_name || '-'}</td>
+      <td style="color:var(--muted)">${o.email || '-'}</td>
+      <td style="color:var(--muted)">${new Date(o.order_date).toLocaleString()}</td>
+      <td style="font-family:var(--font-mono)">${fmt(o.total_amount)}</td>
+      <td><span class="badge badge-gray">${o.payment_method}</span></td>
+      <td>${statusBadge(o.status)}</td>
+      <td>
+        <select class="tbl-search" onchange="updateShopOrderStatus(${o.id}, this.value)" style="width: 100px; padding: 2px;">
+          <option value="" disabled selected>Update...</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </td>
+    </tr>`).join('');
+    }
+
+    async function updateShopOrderStatus(id, status) {
+      try {
+        await apiFetch('/orders/user-orders/' + id + '/status', {
+          method: 'PUT',
+          body: JSON.stringify({ status })
+        });
+        // Update local state
+        const idx = DB.shop_orders.findIndex(o => o.id === id);
+        if (idx !== -1) DB.shop_orders[idx].status = status;
+        renderShopOrders();
+      } catch (err) {
+        alert('Error updating status: ' + err.message);
+      }
+    }
+
+    // ============================================================
+    // CUSTOMERS
+    // ============================================================
+    function renderCustomers() {
+      const orderCounts = {};
+      sales_orders.forEach(o => { orderCounts[o.customer_id] = (orderCounts[o.customer_id] || 0) + 1; });
+      document.getElementById('cust-tbody').innerHTML = DB.customers.map(c => `
+    <tr>
+      <td><span class="tag">#${c.id}</span></td>
+      <td>${c.name}</td>
+      <td>${c.city}</td>
+      <td>${c.country}</td>
+      <td style="color:var(--muted)">${c.phone_number}</td>
+      <td style="font-family:var(--font-mono)">${(orderCounts[c.id] || 0)}</td>
+    </tr>`).join('');
+    }
+
+    // ============================================================
+    // SUPPLIERS
+    // ============================================================
+    function renderSuppliers() {
+      const whCounts = {};
+      DB.warehouses.forEach(w => { whCounts[w.supplier_id] = (whCounts[w.supplier_id] || 0) + 1; });
+      const poCounts = {};
+      DB.purchase_orders.forEach(po => { poCounts[po.supplier_id] = (poCounts[po.supplier_id] || 0) + 1; });
+      document.getElementById('sup-grid').innerHTML = DB.suppliers.map(s => `
+    <div class="sup-card">
+      <div class="sup-name">${s.name}</div>
+      <div class="sup-detail">✉ ${s.email}</div>
+      <div class="sup-detail">📞 ${s.phone}</div>
+      <div class="sup-detail">📍 ${s.address}</div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <span class="badge badge-blue">${whCounts[s.id] || 0} warehouses</span>
+        <span class="badge badge-warn">${poCounts[s.id] || 0} POs</span>
+      </div>
+    </div>`).join('');
+    }
+
+    // ============================================================
+    // USERS
+    // ============================================================
+    function renderUsers() {
+      const userPOs = {};
+      DB.purchase_orders.forEach(po => { userPOs[po.created_by] = (userPOs[po.created_by] || 0) + 1; });
+      const userSOs = {};
+      sales_orders.forEach(so => { userSOs[so.issued_by] = (userSOs[so.issued_by] || 0) + 1; });
+      const userShopOrders = {};
+      DB.shop_orders.forEach(o => { userShopOrders[o.user_id] = (userShopOrders[o.user_id] || 0) + 1; });
+
+      document.getElementById('users-tbody').innerHTML = DB.users.map(u => `
+    <tr>
+      <td><span class="tag">#${u.id}</span></td>
+      <td>${u.name}</td>
+      <td style="color:var(--muted)">${u.email}</td>
+      <td style="font-family:var(--font-mono)">${u.time_stamp}</td>
+      <td style="font-family:var(--font-mono)">${(userSOs[u.id] || 0) + (userPOs[u.id] || 0) + (userShopOrders[u.id] || 0)}</td>
+      <td>
+        <button class="filter-btn" style="color:var(--danger); border-color:var(--danger); padding: 2px 8px;" onclick="deleteUser(${u.id})">Delete</button>
+      </td>
+    </tr>`).join('');
+    }
+
+    async function deleteUser(id) {
+      if (!confirm('Are you sure you want to permanently delete this user? All their order history will be removed.')) return;
+      try {
+        await apiFetch(`/users/${id}`, { method: 'DELETE' });
+        alert('User deleted');
+        loadAllData(); // Refresh dashboard data
+      } catch (err) {
+        alert('Error deleting user: ' + err.message);
+      }
+    }
+
+    // ============================================================
+    // DASHBOARD CHARTS
+    // ============================================================
+    async function renderDashboard() {
+      // Fetch live summary stats
+      try {
+        const stats = await apiGet('/admin/stats');
+        document.querySelector('[data-stat="products"] .value').textContent = Number(stats.products).toLocaleString();
+        document.querySelector('[data-stat="products"] .sub-value').textContent = `across ${stats.warehouses} warehouses`;
+        document.querySelector('[data-stat="inventory"] .value').textContent = Number(stats.inv_records).toLocaleString();
+        document.querySelector('[data-stat="inventory"] .sub-value').textContent = `${stats.warehouses} warehouse locations`;
+        document.querySelector('[data-stat="po"] .value').textContent = Number(stats.po_count).toLocaleString();
+        document.querySelector('[data-stat="po"] .sub-value').textContent = `€${Number(stats.po_total).toLocaleString()} total value`;
+
+        const combinedOrders = Number(stats.sales_count) + Number(stats.shop_count);
+        const combinedTotal = Number(stats.sales_total) + Number(stats.shop_total);
+        document.getElementById('dash-sales-count').textContent = combinedOrders.toLocaleString();
+        document.getElementById('dash-sales-sub').textContent = `CZK ${fmt(combinedTotal)} total revenue`;
+      } catch (e) { /* stats fail gracefully */ }
+      // Category bar chart
+      const catCounts = {};
+      inventory.forEach(r => { const cat = productCat(r.product_id); catCounts[cat] = (catCounts[cat] || 0) + r.quantity; });
+      const sortedCats = Object.entries(catCounts).sort((a, b) => b[1] - a[1]);
+      const maxCat = sortedCats[0]?.[1] || 1;
+      const catColors = ['#4fffb0', '#7c6dfa', '#ffb347', '#ff5370', '#38bdf8', '#a5f3fc', '#fbbf24', '#f9a8d4'];
+      document.getElementById('category-chart').innerHTML = sortedCats.map(([cat, qty], i) => `
+    <div class="bar-row">
+      <div class="bar-label" title="${cat}">${cat}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${qty / maxCat * 100}%;background:${catColors[i % catColors.length]}"></div>
+      </div>
+      <div class="bar-val">${qty.toLocaleString()}</div>
+    </div>`).join('');
+
+      // Sales status donut (combines B2B and B2C)
+      const statusCounts = {};
+      sales_orders.forEach(o => { statusCounts[o.status] = (statusCounts[o.status] || 0) + 1; });
+      DB.shop_orders.forEach(o => { 
+        const st = o.status === 'completed' ? 'Delivered' : (o.status === 'cancelled' ? 'Cancelled' : 'Pending');
+        statusCounts[st] = (statusCounts[st] || 0) + 1; 
+      });
+      const statColors = { Pending: '#ffb347', Processing: '#7c6dfa', Shipped: '#38bdf8', Delivered: '#4fffb0', Cancelled: '#ff5370' };
+      const total = sales_orders.length + DB.shop_orders.length;
+      let cumAngle = -Math.PI / 2;
+      const R = 45, r = 28, cx = 60, cy = 60;
+      let paths = '';
+      const legendItems = [];
+      for (const [st, cnt] of Object.entries(statusCounts)) {
+        const frac = cnt / total;
+        const angle = frac * 2 * Math.PI;
+        const x1 = cx + R * Math.cos(cumAngle), y1 = cy + R * Math.sin(cumAngle);
+        const x2 = cx + R * Math.cos(cumAngle + angle), y2 = cy + R * Math.sin(cumAngle + angle);
+        const ix1 = cx + r * Math.cos(cumAngle), iy1 = cy + r * Math.sin(cumAngle);
+        const ix2 = cx + r * Math.cos(cumAngle + angle), iy2 = cy + r * Math.sin(cumAngle + angle);
+        const large = angle > Math.PI ? 1 : 0;
+        paths += `<path d="M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${ix2},${iy2} A${r},${r} 0 ${large},0 ${ix1},${iy1} Z" fill="${statColors[st] || '#888'}" opacity="0.85"/>`;
+        cumAngle += angle;
+        legendItems.push(`<div class="legend-item"><div class="legend-dot" style="background:${statColors[st]}"></div><span style="color:var(--muted)">${st}</span><span style="margin-left:auto;font-family:var(--font-mono);color:var(--text)">${cnt}</span></div>`);
+      }
+      document.getElementById('donut-svg').innerHTML = paths;
+      document.getElementById('donut-legend').innerHTML = legendItems.join('');
+
+      // Warehouse stock bar
+      const whStockTotals = {};
+      inventory.forEach(r => { whStockTotals[r.location_id] = (whStockTotals[r.location_id] || 0) + r.quantity; });
+      const maxWH = Math.max(...Object.values(whStockTotals));
+      document.getElementById('wh-chart').innerHTML = DB.warehouses.map((w, i) => `
+    <div class="bar-row">
+      <div class="bar-label">${w.name}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${(whStockTotals[w.id] || 0) / maxWH * 100}%;background:${catColors[i % catColors.length]}"></div>
+      </div>
+      <div class="bar-val">${(whStockTotals[w.id] || 0).toLocaleString()}</div>
+    </div>`).join('');
+
+      // Activity feed — build from live data
+      const activities = [];
+      sales_orders.slice(0, 4).forEach(o => {
+        activities.push({
+          rawTime: new Date(o.order_date).getTime(),
+          dot: o.status === 'Delivered' ? '#4fffb0' : o.status === 'Cancelled' ? '#ff5370' : o.status === 'Shipped' ? '#38bdf8' : '#ffb347',
+          text: `Sales Order #${o.id} ${o.status.toLowerCase()} — ${o._customer_name || customerName(o.customer_id)} · CZK ${fmt(o.total_amount)}`,
+          time: new Date(o.order_date).toLocaleDateString()
+        });
+      });
+      DB.purchase_orders.slice(0, 3).forEach(po => {
+        activities.push({
+          rawTime: new Date(po.order_date).getTime(),
+          dot: po.status === 'Received' ? '#4fffb0' : po.status === 'Sent' ? '#ffb347' : '#7c6dfa',
+          text: `Purchase Order #${po.id} ${po.status.toLowerCase()} — ${supplierName(po.supplier_id)} · €${fmt(po.total_amount)}`,
+          time: new Date(po.order_date).toLocaleDateString()
+        });
+      });
+      DB.shop_orders.slice(0, 4).forEach(o => {
+        activities.push({
+          rawTime: new Date(o.order_date).getTime(),
+          dot: o.status === 'completed' ? '#4fffb0' : o.status === 'cancelled' ? '#ff5370' : '#ffb347',
+          text: `Shop Order #${o.id} ${o.status} — ${o.customer_name || 'Customer'} · CZK ${fmt(o.total_amount)}`,
+          time: new Date(o.order_date).toLocaleDateString()
+        });
+      });
+
+      // Sort recent first
+      activities.sort((a, b) => b.rawTime - a.rawTime);
+
+      document.getElementById('activity-feed').innerHTML = activities.slice(0, 7).map(a => `
+    <div class="activity-item">
+      <div class="activity-dot" style="background:${a.dot}"></div>
+      <div>
+        <div class="activity-text">${a.text}</div>
+        <div class="activity-time">${a.time}</div>
+      </div>
+    </div>`).join('');
+
+      // update dash stats
+      renderSales();
+    }
+
+    // ============================================================
+    // GLOBAL SEARCH
+    // ============================================================
+    function globalSearch(q) {
+      if (!q || q.length < 2) return;
+      // Navigate to products and search there
+      const lq = q.toLowerCase();
+      const prodMatch = products.find(p => p.name.toLowerCase().includes(lq));
+      if (prodMatch) {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.nav-item')[1].classList.add('active');
+        navigate('products', document.querySelectorAll('.nav-item')[1]);
+        prodState.search = lq;
+        renderProducts();
+      }
+    }
+
+    // ============================================================
+    // MODAL
+    // ============================================================
+    function closeModal(e, force) {
+      if (force || (e && e.target === document.getElementById('modal-overlay'))) {
+        document.getElementById('modal-overlay').classList.remove('open');
+      }
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    // ============================================================
+    // INIT — load live data from MySQL via backend API
+    // ============================================================
+    requestAnimationFrame(() => loadAllData());
+  </script>
+</body>
+
+</html>

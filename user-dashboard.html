@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard — Rohlik IMS</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0;
+      margin: 0;
+    }
+
+    .wrap {
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .dash-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .logout-btn {
+      background: var(--accent2);
+      color: #0d0f14;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      opacity: 0.85;
+    }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .dash-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .card-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="dash-header">
+      <div class="dash-title">Hello, <span id="user-name">…</span></div>
+      <button class="logout-btn" onclick="logout('login.html')">Sign Out</button>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="card-label">Total Products</div>
+        <div class="card-value" id="stat-products">—</div>
+      </div>
+      <div class="dash-card">
+        <div class="card-label">Stock Records</div>
+        <div class="card-value" id="stat-inv" style="color:var(--accent2)">—</div>
+      </div>
+      <div class="dash-card">
+        <div class="card-label">Sales Orders</div>
+        <div class="card-value" id="stat-sales" style="color:var(--warn)">—</div>
+      </div>
+      <div class="dash-card">
+        <div class="card-label">Purchase Orders</div>
+        <div class="card-value" id="stat-po" style="color:var(--danger)">—</div>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="card-label">Account Details</div>
+      <div style="margin-top:10px;font-size:13px;line-height:2">
+        <div>📧 <span id="user-email" style="color:var(--muted)">—</span></div>
+        <div>🔑 Role: <span style="color:var(--accent2)">user</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    requireAuth('login.html');
+
+    const user = getUser();
+    document.getElementById('user-name').textContent = user?.name || 'User';
+    document.getElementById('user-email').textContent = user?.email || '—';
+
+    // Load public stats from backend
+    (async () => {
+      try {
+        // stats endpoint requires admin token — use a lightweight public products count instead
+        const products = await apiFetch('/products');
+        document.getElementById('stat-products').textContent = products.length.toLocaleString();
+      } catch { document.getElementById('stat-products').textContent = 'N/A'; }
+    })();
+  </script>
+</body>
+
+</html>

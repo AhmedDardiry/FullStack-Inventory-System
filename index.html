@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rohlik IMS — Inventory Management</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #141720;
+      --surface2: #1c2030;
+      --border: #252a3a;
+      --accent: #4fffb0;
+      --accent2: #7c6dfa;
+      --warn: #ffb347;
+      --danger: #ff5370;
+      --text: #e8eaf2;
+      --muted: #6b7294;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .nav-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .nav-btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .nav-btn-outline:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .nav-btn-fill {
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      color: #0d0f14;
+      font-weight: 700;
+    }
+
+    .nav-btn-fill:hover {
+      opacity: 0.85;
+    }
+
+    .hero {
+      max-width: 800px;
+      margin: 80px auto;
+      text-align: center;
+      padding: 0 24px;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: rgba(79, 255, 176, 0.1);
+      border: 1px solid rgba(79, 255, 176, 0.2);
+      color: var(--accent);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span {
+      color: var(--accent);
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 560px;
+      margin: 0 auto 36px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cta-btn {
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cta-primary {
+      background: var(--accent);
+      color: #0d0f14;
+      border: none;
+    }
+
+    .cta-primary:hover {
+      opacity: 0.85;
+    }
+
+    .cta-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .cta-secondary:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 0 24px;
+    }
+
+    .feat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .feat-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .feat-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .feat-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media(max-width:640px) {
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        padding: 16px 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <div class="brand">rohlik IMS</div>
+    <div class="nav-links">
+      <a href="login.html" class="nav-btn nav-btn-outline">Sign In</a>
+      <a href="register.html" class="nav-btn nav-btn-fill">Get Started</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-tag">✦ Inventory Management System</div>
+    <h1>Control your <span>inventory</span> for warehouses</h1>
+    <div class="hero-cta">
+      <a href="register.html" class="cta-btn cta-primary">Start for Free →</a>
+      <a href="admin-login.html" class="cta-btn cta-secondary">Admin Panel</a>
+    </div>
+  </section>
+
+  <div class="features">
+    <div class="feat-card">
+      <div class="feat-icon">▦</div>
+      <div class="feat-title">Live Inventory</div>
+      <div class="feat-desc">Real-time stock tracking across multiple warehouses. Every update syncs instantly to the
+        database.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">↗</div>
+      <div class="feat-title">Order Management</div>
+      <div class="feat-desc">Manage sales and purchase orders end-to-end with status tracking and payment logging.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⬡</div>
+      <div class="feat-title">Admin Dashboard</div>
+      <div class="feat-desc">Powerful admin panel with charts, metrics, and full CRUD control over all data entities.
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

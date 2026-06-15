@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login — Rohlik IMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="auth-card">
+  <div class="auth-brand">rohlik <span style="color:var(--accent2);font-size:14px">ADMIN</span></div>
+  <div class="auth-sub">ADMINISTRATOR ACCESS</div>
+
+  <div class="error-msg" id="err"></div>
+
+  <div class="form-group">
+    <label>Admin Email</label>
+    <input type="email" id="email" placeholder="admin@rohlik.cz" value="admin@rohlik.cz">
+  </div>
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="••••••••">
+  </div>
+
+  <button class="btn" id="btn" onclick="adminLogin()" style="background:var(--accent2)">Access Admin Panel</button>
+  <button class="btn btn-outline" onclick="window.location.href='index.html'">← Back to Home</button>
+</div>
+
+<script src="app.js"></script>
+<script>
+async function adminLogin() {
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const errEl    = document.getElementById('err');
+  const btn      = document.getElementById('btn');
+
+  errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = 'Enter credentials.'; errEl.style.display='block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Authenticating…';
+
+  try {
+    const data = await apiFetch('/auth/admin-login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    setToken(data.token);
+    setUser({ email, role: 'admin', name: 'Admin' });
+    window.location.href = data.redirect || 'test_fixed.html';
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Access Admin Panel';
+  }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
+</script>
+</body>
+</html>

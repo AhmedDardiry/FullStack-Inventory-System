@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details — SaaS App</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            display: block !important;
+            padding: 0;
+            background: var(--bg);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+        }
+
+        .back-link {
+            color: var(--accent2);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .detail-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .detail-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            color: var(--muted);
+        }
+
+        .value {
+            font-weight: 700;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-completed {
+            background: rgba(79, 255, 176, 0.2);
+            color: var(--accent);
+        }
+
+        .status-pending {
+            background: rgba(255, 179, 71, 0.2);
+            color: var(--warn);
+        }
+
+        .item-table {
+            width: 100%;
+        }
+
+        .item-header {
+            display: grid;
+            grid-template-columns: 1fr 100px 100px 100px;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 1fr 100px 100px 100px;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="brand">SaaS Shop</div>
+        <a href="orders.html" class="back-link">← Back to Orders</a>
+    </div>
+
+    <div class="container">
+        <div class="detail-title">Order Details</div>
+
+        <div class="detail-section">
+            <div class="section-title">Order Information</div>
+            <div class="detail-row">
+                <span class="label">Order ID:</span>
+                <span class="value" id="order-id">—</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Order Date:</span>
+                <span class="value" id="order-date">—</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Status:</span>
+                <span id="order-status">—</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Payment Method:</span>
+                <span class="value" id="payment-method">—</span>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="section-title">Order Items</div>
+            <div class="item-table">
+                <div class="item-header">
+                    <span>Product</span>
+                    <span style="text-align: right;">Price</span>
+                    <span style="text-align: center;">Qty</span>
+                    <span style="text-align: right;">Total</span>
+                </div>
+                <div id="order-items"></div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-row">
+                <span class="label">Subtotal:</span>
+                <span class="value" id="subtotal">—</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Tax (10%):</span>
+                <span class="value" id="tax">—</span>
+            </div>
+            <div class="detail-row" style="padding-top: 12px; border-top: 1px solid var(--border); font-size: 16px;">
+                <span class="label">Total Amount:</span>
+                <span class="value" id="total-amount">—</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        async function loadOrderDetails() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const orderId = urlParams.get('id');
+
+                if (!orderId) {
+                    window.location.href = 'orders.html';
+                    return;
+                }
+
+                const order = await apiFetch(`/orders/user-orders/${orderId}`);
+                renderOrderDetails(order);
+            } catch (err) {
+                console.error('Failed to load order:', err);
+                alert('Order not found');
+                window.location.href = 'orders.html';
+            }
+        }
+
+        function renderOrderDetails(order) {
+            document.getElementById('order-id').textContent = order.id;
+            document.getElementById('order-date').textContent = new Date(order.order_date).toLocaleDateString();
+
+            const statusBadge = document.getElementById('order-status');
+            statusBadge.innerHTML = `<span class="status-badge status-${order.status}">${order.status}</span>`;
+
+            document.getElementById('payment-method').textContent = order.payment_method || 'Card';
+
+            const itemsHtml = order.items.map(item => `
+                <div class="item-row">
+                    <span>${item.name}</span>
+                    <span style="text-align: right;">$${item.price.toFixed(2)}</span>
+                    <span style="text-align: center;">${item.quantity}</span>
+                    <span style="text-align: right;">$${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+            `).join('');
+            document.getElementById('order-items').innerHTML = itemsHtml;
+
+            const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.1;
+            const total = subtotal + tax;
+
+            document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+            document.getElementById('tax').textContent = '$' + tax.toFixed(2);
+            document.getElementById('total-amount').textContent = '$' + total.toFixed(2);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = getUser();
+            if (!user) { window.location.href = 'login.html'; return; }
+            loadOrderDetails();
+        });
+    </script>
+</body>
+
+</html>

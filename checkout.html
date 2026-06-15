@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout — SaaS App</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --check-bg: #080b10;
+            --check-surface: #0e1219;
+            --check-surface2: #141a24;
+            --check-surface3: #1c2535;
+            --check-border: rgba(255, 255, 255, .07);
+            --check-border2: rgba(255, 255, 255, .12);
+            --check-accent: #00e5a0;
+            --check-accent2: #3b9eff;
+            --check-danger: #ff4d6d;
+            --check-text: #e8edf5;
+            --check-muted: #5a6a82;
+            --check-muted2: #8898aa;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --transition: all .2s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        body {
+            display: block !important;
+            padding: 0;
+            background: var(--check-bg);
+            color: var(--check-text);
+            font-family: 'DM Mono', monospace;
+            min-height: 100vh;
+            background-image:
+                linear-gradient(rgba(0, 229, 160, .03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 160, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 28px;
+            height: 64px;
+            border-bottom: 1px solid var(--check-border);
+            background: rgba(8, 11, 16, .85);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            font-family: 'Syne', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--check-accent);
+        }
+
+        .back-link {
+            color: var(--check-accent2);
+            text-decoration: none;
+            font-weight: 700;
+            padding: 7px 16px;
+            border-radius: 8px;
+            background: var(--check-surface3);
+            border: 1px solid var(--check-border2);
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            background: var(--check-surface2);
+            border-color: var(--check-accent2);
+            box-shadow: 0 0 24px rgba(59, 158, 255, .18);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 28px;
+        }
+
+        .checkout-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 28px;
+            margin-bottom: 28px;
+            font-weight: 700;
+        }
+
+        .form-section {
+            background: var(--check-surface);
+            border: 1px solid var(--check-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .form-section:hover {
+            border-color: var(--check-border2);
+            background: var(--check-surface2);
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            color: var(--check-accent2);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--check-muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--check-surface2);
+            border: 1px solid var(--check-border2);
+            border-radius: 8px;
+            color: var(--check-text);
+            font-size: 13px;
+            font-family: 'DM Mono', monospace;
+            transition: var(--transition);
+        }
+
+        .form-group input::placeholder {
+            color: var(--check-muted);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--check-accent);
+            box-shadow: 0 0 0 3px rgba(0, 229, 160, .1);
+            background: var(--check-surface3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .order-summary {
+            background: var(--check-surface);
+            border: 1px solid var(--check-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--check-accent2);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: var(--check-muted2);
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 12px;
+            border-top: 1px solid var(--check-border);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--check-accent);
+        }
+
+        .pay-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--check-accent);
+            color: #03120a;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .pay-btn:hover {
+            background: #00cc8e;
+            box-shadow: 0 0 24px rgba(0, 229, 160, .18);
+            transform: translateY(-1px);
+        }
+
+        .pay-btn:disabled {
+            background: var(--check-muted);
+            cursor: not-allowed;
+            opacity: .6;
+        }
+
+        .error-msg {
+            color: var(--check-danger);
+            font-size: 12px;
+            margin-top: 8px;
+            padding: 10px 12px;
+            background: rgba(255, 77, 109, .1);
+            border: 1px solid var(--check-danger);
+            border-radius: 6px;
+            display: none;
+        }
+
+        .success-msg {
+            color: var(--check-accent);
+            font-size: 12px;
+            margin-top: 8px;
+            padding: 10px 12px;
+            background: rgba(0, 229, 160, .1);
+            border: 1px solid var(--check-accent);
+            border-radius: 6px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="brand">SaaS Shop</div>
+        <a href="cart.html" class="back-link">← Back to Cart</a>
+    </div>
+
+    <div class="container">
+        <div class="checkout-title">Checkout</div>
+
+        <div class="order-summary">
+            <div class="summary-title">Order Summary</div>
+            <div id="order-items"></div>
+            <div class="summary-item" style="margin-top: 10px;">
+                <input type="text" id="discount-code" placeholder="Discount Code" style="flex:1; padding: 6px 10px; background: var(--check-surface2); border: 1px solid var(--check-border2); border-radius: 4px; color: var(--check-text); font-family: 'DM Mono', monospace; font-size: 12px; margin-right: 8px;">
+                <button type="button" onclick="applyDiscount()" style="padding: 6px 12px; background: var(--check-surface3); border: 1px solid var(--check-border2); border-radius: 4px; color: var(--check-accent2); cursor: pointer; font-weight: 700; font-family: 'Syne', sans-serif;">Apply</button>
+            </div>
+            <div class="summary-item" id="discount-row" style="display:none; color: var(--check-accent);">
+                <span>Discount (10%):</span>
+                <span id="discount-amount">-$0.00</span>
+            </div>
+            <div class="summary-total">
+                <span>Total:</span>
+                <span id="total-price">$0.00</span>
+            </div>
+        </div>
+
+        <form id="checkout-form" onsubmit="submitPayment(event)">
+            <div class="form-section">
+                <div class="section-title">Shipping Address</div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="address" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" id="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Zip Code</label>
+                        <input type="text" id="zip" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">Payment Method</div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="payment-method">
+                        <option value="cod">Cash on Delivery</option>
+                        <option value="card">Credit/Debit Card</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="bank">Bank Transfer</option>
+                    </select>
+                </div>
+                <div id="cc-fields">
+                    <div class="form-group">
+                        <label>Card Number</label>
+                        <input type="text" id="card-number" placeholder="1234 5678 9012 3456" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Expiry Date</label>
+                            <input type="text" id="expiry" placeholder="MM/YY" required>
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="text" id="cvv" placeholder="123" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error-msg" class="error-msg"></div>
+            <div id="success-msg" class="success-msg"></div>
+            <button type="submit" class="pay-btn" id="pay-btn">Complete Payment</button>
+        </form>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function getCart() { try { return JSON.parse(localStorage.getItem('cart')) || []; } catch { return []; } }
+
+        let isDiscountApplied = false;
+
+        function applyDiscount() {
+            const code = document.getElementById('discount-code').value.trim();
+            if (code === 'Save10') {
+                isDiscountApplied = true;
+                localStorage.setItem('discountCode', 'Save10');
+                document.getElementById('discount-row').style.display = 'flex';
+                loadOrderSummary();
+            } else if (code) {
+                alert('Invalid discount code. Try "Save10"');
+                isDiscountApplied = false;
+                localStorage.removeItem('discountCode');
+                document.getElementById('discount-row').style.display = 'none';
+                loadOrderSummary();
+            }
+        }
+
+        async function submitPayment(e) {
+            e.preventDefault();
+            const cart = getCart();
+            if (cart.length === 0) return alert('Cart is empty');
+
+            const payBtn = document.getElementById('pay-btn');
+            payBtn.disabled = true;
+            payBtn.textContent = 'Processing...';
+
+            try {
+                let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 1.1;
+                if (isDiscountApplied) total = total * 0.9;
+                
+                const paymentMethod = document.getElementById('payment-method').value;
+
+                if (paymentMethod !== 'cod') {
+                    document.getElementById('error-msg').textContent = 'Payment failed: Only Cash on Delivery is supported at the moment.';
+                    document.getElementById('error-msg').style.display = 'block';
+                    payBtn.disabled = false;
+                    payBtn.textContent = 'Complete Payment';
+                    return;
+                }
+
+                const response = await apiFetch('/orders/user-purchase', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        items: cart.map(item => ({ ...item, productId: item.id })),
+                        totalAmount: total,
+                        paymentMethod: paymentMethod
+                    })
+                });
+
+                document.getElementById('success-msg').textContent = 'Payment successful! Order #' + response.orderId;
+                document.getElementById('success-msg').style.display = 'block';
+                localStorage.removeItem('cart');
+                localStorage.removeItem('discountCode');
+
+                setTimeout(() => {
+                    window.location.href = 'orders.html';
+                }, 2000);
+            } catch (err) {
+                document.getElementById('error-msg').textContent = 'Payment failed: ' + err.message;
+                document.getElementById('error-msg').style.display = 'block';
+                payBtn.disabled = false;
+                payBtn.textContent = 'Complete Payment';
+            }
+        }
+
+        function loadOrderSummary() {
+            const cart = getCart();
+            if (cart.length === 0) {
+                window.location.href = 'cart.html';
+                return;
+            }
+
+            let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 1.1;
+
+            if (localStorage.getItem('discountCode') === 'Save10') {
+                document.getElementById('discount-code').value = 'Save10';
+                isDiscountApplied = true;
+                document.getElementById('discount-row').style.display = 'flex';
+            } else {
+                isDiscountApplied = false;
+                document.getElementById('discount-row').style.display = 'none';
+            }
+
+            if (isDiscountApplied) {
+                const discount = total * 0.1;
+                document.getElementById('discount-amount').textContent = '-$' + discount.toFixed(2);
+                total = total - discount;
+            }
+
+            document.getElementById('total-price').textContent = '$' + total.toFixed(2);
+
+            document.getElementById('order-items').innerHTML = cart.map(item => `
+                <div class="summary-item">
+                    <span>${item.name} x ${item.quantity}</span>
+                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = getUser();
+            if (!user) { window.location.href = 'login.html'; return; }
+            document.getElementById('name').value = user.name;
+            document.getElementById('email').value = user.email;
+            
+            // Handle COD selection
+            const paymentMethodSelect = document.getElementById('payment-method');
+            const ccFields = document.getElementById('cc-fields');
+            const inputs = ccFields.querySelectorAll('input');
+            
+            function toggleFields() {
+                if (paymentMethodSelect.value === 'cod') {
+                    ccFields.style.display = 'none';
+                    inputs.forEach(input => {
+                        input.required = false;
+                        input.value = '';
+                    });
+                } else {
+                    ccFields.style.display = 'block';
+                    inputs.forEach(input => input.required = true);
+                }
+            }
+            paymentMethodSelect.addEventListener('change', toggleFields);
+            
+            // Trigger initially to set correct state (COD is default)
+            toggleFields();
+            
+            loadOrderSummary();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders — SaaS App</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            display: block !important;
+            padding: 0;
+            background: var(--bg);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+        }
+
+        .back-link {
+            color: var(--accent2);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .orders-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .order-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .order-id {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .order-date {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .order-status {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: rgba(79, 255, 176, 0.2);
+            color: var(--accent);
+        }
+
+        .status-pending {
+            background: rgba(255, 179, 71, 0.2);
+            color: var(--warn);
+        }
+
+        .order-items {
+            margin: 16px 0;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .view-btn {
+            background: var(--accent2);
+            color: #0d0f14;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-top: 12px;
+        }
+
+        .view-btn:hover {
+            opacity: 0.85;
+        }
+
+        .empty-orders {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="brand">SaaS Shop</div>
+        <a href="shop.html" class="back-link">← Back to Shop</a>
+    </div>
+
+    <div class="container">
+        <div class="orders-title">My Orders</div>
+        <div id="orders-container"></div>
+        <div id="empty-orders" class="empty-orders" style="display:none;">No orders yet</div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        async function loadOrders() {
+            try {
+                const orders = await apiFetch('/orders/user-orders');
+                renderOrders(orders);
+            } catch (err) {
+                console.error('Failed to load orders:', err);
+                document.getElementById('orders-container').innerHTML = '';
+                document.getElementById('empty-orders').style.display = 'block';
+            }
+        }
+
+        function renderOrders(orders) {
+            const container = document.getElementById('orders-container');
+            const emptyMsg = document.getElementById('empty-orders');
+
+            if (!orders || orders.length === 0) {
+                container.innerHTML = '';
+                emptyMsg.style.display = 'block';
+                return;
+            }
+
+            emptyMsg.style.display = 'none';
+            container.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Order #${order.id}</div>
+                            <div class="order-date">${new Date(order.order_date).toLocaleDateString()}</div>
+                        </div>
+                        <span class="order-status status-${order.status}">${order.status}</span>
+                    </div>
+                    <div class="order-items">
+                        ${order.items ? order.items.map(item => `
+                            <div class="item-row">
+                                <span>${item.name} x ${item.quantity}</span>
+                                <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                        `).join('') : ''}
+                    </div>
+                    <div class="order-total">
+                        <span>Total:</span>
+                        <span>$${order.total_amount.toFixed(2)}</span>
+                    </div>
+                    <button class="view-btn" onclick="viewOrderDetails(${order.id})">View Details</button>
+                </div>
+            `).join('');
+        }
+
+        function viewOrderDetails(orderId) {
+            window.location.href = `order-details.html?id=${orderId}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = getUser();
+            if (!user) { window.location.href = 'login.html'; return; }
+            loadOrders();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart — SaaS App</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --cart-bg: #080b10;
+            --cart-surface: #0e1219;
+            --cart-surface2: #141a24;
+            --cart-surface3: #1c2535;
+            --cart-border: rgba(255, 255, 255, .07);
+            --cart-border2: rgba(255, 255, 255, .12);
+            --cart-accent: #00e5a0;
+            --cart-accent2: #3b9eff;
+            --cart-danger: #ff4d6d;
+            --cart-text: #e8edf5;
+            --cart-muted: #5a6a82;
+            --cart-muted2: #8898aa;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --transition: all .2s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        body {
+            display: block !important;
+            padding: 0;
+            background: var(--cart-bg);
+            color: var(--cart-text);
+            font-family: 'DM Mono', monospace;
+            min-height: 100vh;
+            background-image:
+                linear-gradient(rgba(0, 229, 160, .03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 160, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 28px;
+            height: 64px;
+            border-bottom: 1px solid var(--cart-border);
+            background: rgba(8, 11, 16, .85);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            font-family: 'Syne', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--cart-accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-link {
+            color: var(--cart-accent2);
+            text-decoration: none;
+            font-weight: 700;
+            padding: 7px 16px;
+            border-radius: 8px;
+            background: var(--cart-surface3);
+            border: 1px solid var(--cart-border2);
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            background: var(--cart-surface2);
+            border-color: var(--cart-accent2);
+            box-shadow: 0 0 24px rgba(59, 158, 255, .18);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 28px;
+        }
+
+        .cart-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 28px;
+            margin-bottom: 28px;
+            font-weight: 700;
+        }
+
+        .cart-item {
+            background: var(--cart-surface);
+            border: 1px solid var(--cart-border);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .cart-item:hover {
+            border-color: var(--cart-border2);
+            background: var(--cart-surface2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .item-price {
+            color: var(--cart-accent);
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .item-qty {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .qty-input {
+            width: 60px;
+            padding: 8px;
+            background: var(--cart-surface2);
+            border: 1px solid var(--cart-border);
+            border-radius: 6px;
+            color: var(--cart-text);
+            text-align: center;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .remove-btn {
+            background: var(--cart-danger);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        .remove-btn:hover {
+            background: #ff3860;
+            transform: translateY(-1px);
+        }
+
+        .cart-summary {
+            background: var(--cart-surface);
+            border: 1px solid var(--cart-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-top: 28px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 14px;
+            border-top: 1px solid var(--cart-border);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--cart-accent);
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 14px;
+            background: var(--cart-accent);
+            color: #03120a;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 14px;
+            transition: var(--transition);
+        }
+
+        .btn-checkout:hover {
+            background: #00cc8e;
+            box-shadow: 0 0 24px rgba(0, 229, 160, .18);
+            transform: translateY(-1px);
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--cart-muted);
+        }
+
+        .empty-cart::before {
+            content: '◻';
+            display: block;
+            font-size: 48px;
+            margin-bottom: 12px;
+            color: var(--cart-surface3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="brand">Cart</div>
+        <a href="shop.html" class="back-link">← Back to Shop</a>
+    </div>
+
+    <div class="container">
+        <div class="cart-title">Your Cart</div>
+        <div id="cart-items"></div>
+        <div class="cart-summary" id="cart-summary" style="display:none;">
+            <div class="summary-row" style="align-items: center; gap: 10px; margin-bottom: 20px;">
+                <input type="text" id="cart-discount-code" placeholder="Discount Code" style="flex:1; padding: 8px 12px; background: var(--cart-surface2); border: 1px solid var(--cart-border2); border-radius: 6px; color: var(--cart-text); font-family: 'DM Mono', monospace; font-size: 13px;">
+                <button class="btn-checkout" style="width: auto; margin-top: 0; padding: 8px 16px;" onclick="applyCartDiscount()">Apply</button>
+            </div>
+            <div class="summary-row" id="cart-discount-row" style="display:none; color: var(--cart-accent);"><span>Discount (10%):</span><span id="cart-discount-amount">-$0.00</span></div>
+            <div class="summary-row"><span>Subtotal:</span><span id="subtotal">$0.00</span></div>
+            <div class="summary-row"><span>Tax (10%):</span><span id="tax">$0.00</span></div>
+            <div class="summary-total"><span>Total:</span><span id="total">$0.00</span></div>
+            <button class="btn-checkout" onclick="goToCheckout()">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function getCart() { try { return JSON.parse(localStorage.getItem('cart')) || []; } catch { return []; } }
+        function saveCart(cart) { localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); }
+
+        function removeItem(index) {
+            const cart = getCart();
+            cart.splice(index, 1);
+            saveCart(cart);
+        }
+
+        function updateQuantity(index, qty) {
+            const cart = getCart();
+            const user = getUser();
+            const minQty = (user && user.role === 'supplier') ? 10 : 1;
+            
+            if (qty <= 0) {
+                removeItem(index);
+                return;
+            }
+            if (qty < minQty) {
+                alert(`Suppliers must purchase at least ${minQty} items.`);
+                qty = minQty;
+            }
+            cart[index].quantity = parseInt(qty);
+            saveCart(cart);
+        }
+
+        function applyCartDiscount() {
+            const code = document.getElementById('cart-discount-code').value.trim();
+            if (code === 'Save10') {
+                localStorage.setItem('discountCode', code);
+                renderCart();
+            } else if (code) {
+                alert('Invalid discount code. Try "Save10"');
+                localStorage.removeItem('discountCode');
+                renderCart();
+            }
+        }
+
+        function renderCart() {
+            const cart = getCart();
+            const container = document.getElementById('cart-items');
+            const summaryEl = document.getElementById('cart-summary');
+            const user = getUser();
+            const minQty = (user && user.role === 'supplier') ? 10 : 1;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<div class="empty-cart"><p>Your cart is empty</p></div>';
+                summaryEl.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = cart.map((item, i) => {
+                if (item.quantity < minQty) item.quantity = minQty;
+                return `
+                <div class="cart-item">
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price">$${item.price} each</div>
+                    </div>
+                    <div class="item-qty">
+                        <input type="number" class="qty-input" min="${minQty}" value="${item.quantity}" onchange="updateQuantity(${i}, this.value)">
+                        <button class="remove-btn" onclick="removeItem(${i})">Remove</button>
+                    </div>
+                </div>
+            `}).join('');
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.1;
+            const totalBeforeDiscount = subtotal + tax;
+            let discount = 0;
+
+            const discountCode = localStorage.getItem('discountCode');
+            if (discountCode === 'Save10') {
+                const codeInput = document.getElementById('cart-discount-code');
+                if(codeInput) codeInput.value = discountCode;
+                const row = document.getElementById('cart-discount-row');
+                if(row) {
+                    row.style.display = 'flex';
+                    discount = totalBeforeDiscount * 0.1;
+                    document.getElementById('cart-discount-amount').textContent = '-$' + discount.toFixed(2);
+                }
+            } else {
+                const row = document.getElementById('cart-discount-row');
+                if(row) row.style.display = 'none';
+            }
+
+            const total = totalBeforeDiscount - discount;
+
+            document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+            document.getElementById('tax').textContent = '$' + tax.toFixed(2);
+            document.getElementById('total').textContent = '$' + total.toFixed(2);
+            summaryEl.style.display = 'block';
+        }
+
+        function goToCheckout() { window.location.href = 'checkout.html'; }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = getUser();
+            if (!user) { window.location.href = 'login.html'; return; }
+            renderCart();
+        });
+    </script>
+</body>
+
+</html>
